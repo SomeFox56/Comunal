@@ -1,0 +1,203 @@
+﻿@page "/Create_project"
+
+
+@inject NavigationManager NavigationManager
+@using ComunalWork.Data
+
+<style @onload="CheckSession" ></style>
+
+<h1>Создать проект</h1>
+
+<input type="text" placeholder="Название проекта" @bind-value="@title" />
+<p>Выбрать проектировщика</p>
+<select @bind="@human1">  
+    <option disabled selected>Выберите проектировщика</option>
+@foreach (var i in Database.FindForProject1())
+            {
+                  
+                    <option value="@i.Id">
+                        @i.Fio @i.Post;
+                    </option>
+               
+            }
+</select>
+<p>Выбрать застройщика</p>
+
+<select @bind="@human2">  
+    <option disabled selected>Выберите застройщика</option>
+@foreach (var i in Database.FindForProject2())
+            {
+                  
+                    <option value="@i.Id">
+                        @i.Fio @i.Post;
+                    </option>
+               
+            }
+</select>
+<h1>Выбрать нужную документацию</h1>
+<div class="document">
+    <p>1. Акт обследования и выбора трассы сети водоснабжения</p>
+    <input type="checkbox" checked="@IsChecked1" @onchange="CheckboxChanged1">
+</div>
+<div class="document">
+    <p>2. Акт обследования и выбор места под проектируемую скважину</p>
+    <input type="checkbox" checked="@IsChecked2" @onchange="CheckboxChanged2">
+</div>
+<div class="document">
+    <p>3. Согласованный ситуационный план (М1:10000 или
+М1:25000) с нанесением источников воды (скважин,
+родников и т.п.), существующих водонапорных башен,
+предполагаемой трассой водопровода и места врезки в
+существующую сеть.
+</p>
+    <input type="checkbox" checked="@IsChecked3" @onchange="CheckboxChanged3">
+</div>
+<div class="document">
+    <p>4. План населённого пункта в М 1:1000 или М 1:500
+топографическая съемка).
+</p>
+    <input type="checkbox" checked="@IsChecked4" @onchange="CheckboxChanged4">
+</div>
+<div class="document">
+    <p>5. технические условия на водоснабжение;
+</p>
+    <input type="checkbox" checked="@IsChecked5" @onchange="CheckboxChanged5">
+</div>
+<div class="document">
+    <p>6. Технические условия на электроснабжение (для
+насосной станции первого или второго подъема);
+</p>
+    <input type="checkbox" checked="@IsChecked6" @onchange="CheckboxChanged6">
+</div>
+<div class="document">
+    <p>7. Градостроительный план земельного участка</p>
+    <input type="checkbox" checked="@IsChecked7" @onchange="CheckboxChanged7">
+</div>
+<div class="document">
+    <p>8. Справка согласования с собственниками земельных
+участков
+</p>
+   <input type="checkbox" checked="@IsChecked8" @onchange="CheckboxChanged8">
+</div>
+<div class="document">
+    <p>9. документ, подтверждающий проведение межевания с
+присвоением кадастрового номера земельного участка
+под строительство водопровода и сооружений на нем.
+</p>
+    <input type="checkbox" checked="@IsChecked9" @onchange="CheckboxChanged9">
+</div>
+<div class="document">
+    <p>10. заключение Органа Роспотребнадзора
+санитарно-эпидемиологической службы по отводу</p>
+    <input type="checkbox" checked="@IsChecked10" @onchange="CheckboxChanged10">
+</div>
+<div class="document">
+    <p>11. Сведения о наличие водозаборных скважин (родников)
+на территории хозяйства.
+</p>
+    <input type="checkbox" checked="@IsChecked11" @onchange="CheckboxChanged1">
+</div>
+
+<a class="btn" @onclick="Create" > Создать проект</a>
+
+@code{
+
+
+    bool[] checkboxes = new bool[]{false,false,false,false,false,false,false,false,false,false,false};
+    [Parameter]
+    public bool IsChecked1 { get; set; }
+    public bool IsChecked2 { get; set; }
+    public bool IsChecked3 { get; set; }
+    public bool IsChecked4 { get; set; }
+    public bool IsChecked5 { get; set; }
+    public bool IsChecked6 { get; set; }
+    public bool IsChecked7 { get; set; }
+    public bool IsChecked8 { get; set; }
+    public bool IsChecked9 { get; set; }
+    public bool IsChecked10 { get; set; } 
+    public bool IsChecked11 { get; set; } 
+    private void CheckboxChanged1()
+    {
+        if (!IsChecked1){checkboxes[0]=true; IsChecked1 = true; }else{ checkboxes[0] = false; IsChecked1 = false; }
+    }
+    private void CheckboxChanged2()
+    {
+        if (!IsChecked2){checkboxes[1]=true; IsChecked2 = true; }else{ checkboxes[1] = false; IsChecked2 = false; }
+    }
+    private void CheckboxChanged3()
+    {
+        if (!IsChecked3){checkboxes[2]=true; IsChecked3 = true; }else{checkboxes[2] = false; IsChecked3 = false; }
+    }
+    private void CheckboxChanged4()
+    {
+        if (!IsChecked4){checkboxes[3]=true; IsChecked4 = true; }else{ checkboxes[3] = false; IsChecked4 = false; }
+    }
+    private void CheckboxChanged5()
+    {
+        if (!IsChecked5){checkboxes[4]=true; IsChecked5 = true; }else{ checkboxes[4] = false; IsChecked5 = false; }
+    }
+    private void CheckboxChanged6()
+    {
+        if (!IsChecked6){checkboxes[5]=true; IsChecked6 = true; }else{ checkboxes[5] = false; IsChecked6 = false; }
+    }
+    private void CheckboxChanged7()
+    {
+        if (!IsChecked7){checkboxes[6]=true; IsChecked7 = true; }else{checkboxes[6] = false; IsChecked7 = false; }
+    }
+    private void CheckboxChanged8()
+    {
+        if (!IsChecked8){checkboxes[7]=true; IsChecked8 = true; }else{ checkboxes[7] = false; IsChecked8 = false; }
+    }
+    private void CheckboxChanged9()
+    {
+        if (!IsChecked9){checkboxes[8]=true; IsChecked9 = true; }else{ checkboxes[8] = false; IsChecked9 = false; }
+    }
+    private void CheckboxChanged10()
+    {
+        if (!IsChecked10){checkboxes[9]=true; IsChecked10 = true; }else{checkboxes[9] = false; IsChecked10 = false; }
+        
+    }
+    private void CheckboxChanged11()
+    {
+        if (!IsChecked11){checkboxes[10]=true; IsChecked11 = true; }else{checkboxes[10] = false; IsChecked10 = false; }
+        
+    }
+    
+    
+    string human1;
+    string human2;
+    string title="";
+
+    public void CheckSession()
+    {
+
+        
+
+        if (Session.Login != "")
+        {
+            
+        }
+        else
+        {
+            NavigationManager.NavigateTo("");
+        }
+        
+    }
+     private void Create()
+    {
+        Database.AddProject(new Project(title,human1,human2,checkboxes.ToArray(),Session.Login,null));
+        NavigationManager.NavigateTo("Project_Page");
+    }
+
+    
+}
+<style>
+   /* .input_box{display:flex;flex-direction:column;width:20%}
+     input{margin-bottom:10px;padding:7px;border-radius:10px;outline:none;border: 2px black solid}
+   
+     select{margin-bottom:10px;padding:7px;border-radius:10px;outline:none;border: 2px black solid}
+     .document{display:flex}
+     */
+       .btn{background:#fff;font-size:20px;border-radius:10px;border: 2px black solid;margin-bottom: 10px}
+       .document input{width: 20px;height:20px}
+</style>

@@ -1,0 +1,62 @@
+﻿@page "/Project_Page"
+@using MongoDB.Bson.Serialization.Attributes
+@using MongoDB.Driver
+@using MongoDB.Bson
+
+@inject NavigationManager NavigationManager
+@using ComunalWork.Data
+
+<style @onload="CheckSession" ></style>
+
+<h1>Проекты</h1>
+<select @bind="@proj">  
+    <option disabled selected>Выберите Проект</option>
+@foreach (var i in Database.FindProjects(Session.Login))
+            {
+                  
+                    <option value="@i.Id">
+                        @i.Title;
+                    </option>
+               
+            }
+</select>
+<a class="btn" @onclick="Look" > Открыть</a>
+
+@code{
+    private void Look()
+    {
+        try{
+            Look_Project.Id = MongoDB.Bson.ObjectId.Parse(@proj);
+            NavigationManager.NavigateTo("Check_Project");
+        }
+        catch{}
+    }
+    string proj;
+    public void CheckSession()
+    {
+
+        
+
+        if (Session.Login != "" && Database.FindOne(Session.Login).Role=="Заказчик")
+        {
+            
+        }
+        else
+        {
+            NavigationManager.NavigateTo("");
+        }
+       
+    }
+   
+
+    
+}
+<style>
+/*    .input_box{display:flex;flex-direction:column;width:20%}
+     input{margin-bottom:10px;padding:7px;border-radius:10px;outline:none;border: 2px black solid}
+     .btn{background:#fff;font-size:20px;border-radius:10px;border: 2px black solid;margin-bottom: 10px}
+     select{margin-bottom:10px;padding:7px;border-radius:10px;outline:none;border: 2px black solid}
+     .document{display:flex}
+     .document input{width: 20px;height:20px}*/
+     
+</style>

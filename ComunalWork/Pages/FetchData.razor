@@ -1,0 +1,74 @@
+﻿@page "/fetchdata"
+@inject NavigationManager Navigation
+<PageTitle >Weather forecast</PageTitle>
+
+@using ComunalWork.Data
+@inject WeatherForecastService ForecastService
+
+
+@inject NavigationManager NavigationManager
+<h1  >Личный кабинет</h1>
+<style @onload="CheckSession" ></style>
+<p>@login</p>
+<p>@name</p>
+<p>@second_name</p>
+<p>@email</p>
+@if(Database.FindOne(Session.Login) == null)
+{
+    NavigationManager.NavigateTo("");
+}else if(Database.FindOne(Session.Login).Role == "Заказчик")
+            {
+    <a href="project_page">Проекты</a> 
+    <a href="create_project">Создать проект</a>
+}
+else
+{
+    <a href="my_projects">Мои проекты</a>
+}
+           
+<a href="" @onclick ="Exit" >@btnlabel</a>
+
+
+@code{
+
+
+    string btnlabel="";
+    string name="";
+    string login="";
+    string second_name="";
+    string email="";
+    public void CheckSession()
+    {
+
+
+        if (Session.Login != "")
+        {
+            name = "Имя: "+Session.fio;
+            login = "Логин: "+Session.Login;
+
+            email = "Почта: "+Session.Email;
+
+
+            btnlabel = "Выйти из аккаунта";
+        }
+        else
+        {
+            NavigationManager.NavigateTo("");
+            return;
+            btnlabel = "";
+            name = "Нет входа в аккаунт";
+            second_name = "";
+            login = "";
+            email = "";
+        }
+    }
+    public void Exit()
+    {
+        Session.fio ="";
+            Session.Login = "";
+           
+            Session.Email = "";
+    }
+    
+}
+<style>a{margin-right:10px}</style>

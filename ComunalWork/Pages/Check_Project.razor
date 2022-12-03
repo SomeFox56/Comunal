@@ -1,0 +1,185 @@
+﻿@page "/Check_Project"
+@using MongoDB.Bson.Serialization.Attributes
+@using MongoDB.Driver
+@using MongoDB.Bson
+@inject IJSRuntime JS
+
+
+@inject NavigationManager NavigationManager
+@using ComunalWork.Data
+
+<style @onload="CheckSession" ></style>
+
+<h1>Проект</h1><br />
+<h2>Загруженные документы</h2>
+@if (@Database.FindOneProject(Look_Project.Id).Uploaded_Documents != null)
+{
+    @foreach (var item in @Database.FindOneProject(Look_Project.Id).Uploaded_Documents)
+    {
+        var itemsplit = @item.Split('\\');
+        <a href="Read_Doc?doc=@item&id=@Database.FindOneProject(Look_Project.Id).Id">@itemsplit[itemsplit.Length-1]</a>
+    }
+
+}
+<h2>Принятые документы</h2>
+@if (@Database.FindOneProject(Look_Project.Id).Confirmed_Documents != null)
+{
+    @foreach (var item in @Database.FindOneProject(Look_Project.Id).Confirmed_Documents)
+    {
+        var itemsplit = @item.Split('\\');
+        <a href="Read_Doc2?doc=@item&id=@Database.FindOneProject(Look_Project.Id).Id">@itemsplit[itemsplit.Length-1]</a>
+    }
+
+}
+<h2>Отклоненные документы</h2>
+@if (@Database.FindOneProject(Look_Project.Id).Rejected_Documents != null)
+{
+    @foreach (var item in @Database.FindOneProject(Look_Project.Id).Rejected_Documents)
+    {
+        var itemsplit = @item.Split('\\');
+        <a href="Read_Doc2?doc=@item&id=@Database.FindOneProject(Look_Project.Id).Id">@itemsplit[itemsplit.Length-1]</a>
+    }
+
+}
+@if (Database.FindOne(Session.Login).Role == "Застройщик" || Database.FindOne(Session.Login).Role == "Проектировщик")
+{
+    <p>@Database.FindOneProject(Look_Project.Id).Title</p>
+    @foreach (var @docx in @docs)
+    {
+        @if (@docx != "")
+        {
+
+            <p>@docx</p>
+        }
+
+    }
+
+    @using ComunalWork.Data
+    @inject IWebHostEnvironment Environment
+<input type="number" @bind="@countFiles"></input>
+    <InputFile OnChange="@LoadFiles" multiple />
+    @if (isLoading)
+    {
+        <p><em>Loading...</em></p>
+    }
+    else
+    {
+        <table class="table">
+            <thead>
+                <tr>
+                    <th>Название</th>
+                    <th>Размер</th>
+                    <th>Тип</th>
+                    <th>Добавить</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var file in loadedFiles)
+                {
+                    <tr>
+                        <td>@file.Name</td>
+                        <td>@file.Size</td>
+                        <td>@file.ContentType</td>
+                        <td><button @onclick="(() => AddFiles(file))">Зарузить</button></td>
+                    </tr>
+                }
+            </tbody>
+        </table>    <a class="btn" @onclick="Save" > Сохранить</a>
+    }
+}
+
+
+@code{
+
+
+    private Stream GetFileStream()
+    {
+        var randomBinaryData = new byte[50 * 1024];
+        var fileStream = new MemoryStream(randomBinaryData);
+
+        return fileStream;
+    }
+
+    private async Task DownloadFileFromStream(string path)
+    {
+        var fileStream = GetFileStream();
+        var fileName = path;
+
+        using var streamRef = new DotNetStreamReference(stream: fileStream);
+
+        await JS.InvokeVoidAsync("downloadFileFromStream", fileName, streamRef);
+    }
+
+    List<string> ids = new List<string>();
+
+    int countFiles;
+
+    private List<IBrowserFile> loadedFiles = new();
+    private bool isLoading;
+
+    private async Task AddFiles(IBrowserFile file)
+    {
+        var path = Path.Combine(Environment.ContentRootPath, "wwwroot", "uploads", file.Name);
+        using (FileStream fs = new(path, FileMode.Create))
+        {
+            await file.OpenReadStream(1000000000).CopyToAsync(fs);
+        }
+        FileService.UploadImageToDb(file.Name, path);
+
+
+        ids.Add(path);
+
+        loadedFiles.Remove(file);
+    }
+
+    private void LoadFiles(InputFileChangeEventArgs e)
+    {
+        loadedFiles.Clear();
+        isLoading = true;
+        foreach (var file in e.GetMultipleFiles(countFiles))
+        {
+            loadedFiles.Add(file);
+        }
+        isLoading = false;
+    }
+    string proj;
+
+
+    bool[] documents; 
+
+    string[] docs = new string[]{"Акт обследования и выбора трассы сетиводоснабжения","Акт обследования и выбор места под проектируемую скважину",
+    "Согласованный ситуационный план (М1:10000 или М1:25000) с нанесением источников воды (скважин, родников и т.п.), существующих водонапорных башен, предполагаемой трассой водопровода и места врезки в существующую сеть",
+    "План населённого пункта в М 1:1000 или М 1:500 топографическая съемка)","технические условия на водоснабжение","Технические условия на электроснабжение (для насосной станции первого или второго подъема);",
+    "Градостроительный план земельного участка","Справка согласования с собственниками земельных участков",
+    "документ, подтверждающий проведение межевания с присвоением кадастрового номера земельного участка под строительство водопровода и сооружений на нем.",
+    "заключение Органа Роспотребнадзора санитарно-эпидемиологической службы по отводу земельного участка и результат радиационного обследования.",
+    " Сведения о наличие водозаборных скважин (родников)на территории хозяйства."};
+    public void Save()
+    {
+        Database.AddDocuments(Look_Project.Id, ids.ToArray());
+        ids.Clear();
+    }
+    public void CheckSession()
+    {
+        if (Database.FindOneProject(Look_Project.Id).Documents != null) {
+            documents = Database.FindOneProject(Look_Project.Id).Documents;
+             for(int i = 0; i < documents.Length; i++)
+        {
+            if (documents[i] == false)
+            {
+                docs[i] = "";
+            }
+        }
+        }
+                if (Session.Login != "")
+                {
+                    
+                }
+                else
+                {
+                    NavigationManager.NavigateTo("");
+                }
+               
+            }
+        }        
+   }

@@ -1,0 +1,99 @@
+﻿@page "/"
+
+<PageTitle>Index</PageTitle>
+@inject NavigationManager NavigationManager
+<h1>Зарегистрироваться</h1>
+<form>
+<div class="input_box">
+   
+<input type="text"  placeholder="Логин" @bind-value="@login" />
+ 
+<input type="password" placeholder="Пароль" @bind-value="@password" />
+<input type="password" placeholder="Повтор пароля" @bind-value="@password2" />
+
+
+<input type="text" placeholder="ФИО" @bind-value="@fio" />
+
+<input type="text" placeholder="Почта" @bind-value="@email" />
+<input type="text" placeholder="Телефон" @bind-value="@phone" />
+<input type="text" placeholder="Должность" @bind-value="@post" />
+
+<select @bind="@role">
+ 
+  <option selected >Заказчик</option>
+  <option >Застройщик</option>
+  <option>Проектировщик</option>
+</select>
+
+
+<a class="btn" @onclick="Reg" > Зарегистрироваться</a>
+<a class="btn" href="Counter" > Уже есть аккаунт</a>
+<p>@error</p>
+</div>
+</form>
+@code {
+
+    string role = "Заказчик";
+
+    string fio;
+    string login;
+    string password;
+    string password2;
+    string email;
+    string phone;
+    string post;
+    string error;
+
+
+
+
+    private void Reg()
+    {
+        error = null;
+        if (@login == null || @password == null || @fio == null || @phone==null || @email == null || @post == null || @role == null)
+        {
+            error= "Все поля должны быть заполнены";
+
+        }
+        if(@password != @password2)
+        {
+            error= "Пароли не совпадают";
+        }
+        if (email!=null && !email.Contains('@') )
+        {
+            error= "Почта не верная";
+        }
+
+
+        else
+        {
+
+            if(error == null){
+                error = Database.AddToDB(new User(login, password,fio,  email,  role,  post,  phone));
+                Session.fio = fio;
+                Session.Login = login;
+
+                Session.Email = email;
+
+                login = null;
+                password = null;
+
+                fio = null;
+                post = null;
+                phone = null;
+                email = null;
+                error = null;
+                NavigationManager.NavigateTo("FetchData");
+           }
+
+
+        }
+    }
+}
+<style>
+    /*.input_box{display:flex;flex-direction:column;width:20%}
+     input{margin-bottom:10px;padding:7px;border-radius:10px;outline:none;border: 2px black solid}
+     .btn{background:#fff;font-size:20px;border-radius:10px;border: 2px black solid;margin-bottom: 10px}
+     select{margin-bottom:10px;padding:7px;border-radius:10px;outline:none;border: 2px black solid}*/
+     
+</style>

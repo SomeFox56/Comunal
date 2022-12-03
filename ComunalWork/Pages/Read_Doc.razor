@@ -1,0 +1,71 @@
+﻿@page "/Read_Doc"
+@using MongoDB.Bson.Serialization.Attributes
+@using MongoDB.Driver
+@using MongoDB.Bson
+@inject NavigationManager NavManager
+@inject NavigationManager NavigationManager
+@using ComunalWork.Data
+@using System.Web
+
+<style @onload="CheckSession" ></style>
+
+
+<P>@text</P>{
+@if (Database.FindOne(Session.Login).Role == "Заказчик")
+{
+    <a class="btn" @onclick="add" > Принять</a>
+<a class="btn" @onclick="rej" > Отклонить</a>
+<a class="btn" @onclick="back" > Назад</a>
+}
+
+@code{
+
+    string doc;
+    string id;
+    string text;
+    public void back()
+    {
+        NavigationManager.NavigateTo("Check_Project");
+    }
+    public void add()
+    {
+        string[] id1 = new string[1] { doc };
+        Database.AddConfDocuments(new ObjectId(id),id1);
+        NavigationManager.NavigateTo("Check_Project");
+    }
+     public void rej()
+    {
+        string[] id1 = new string[1] { doc };
+        Database.AddRejDocuments(new ObjectId(id),id1);
+        NavigationManager.NavigateTo("Check_Project");
+    }
+
+    public void CheckSession()
+    {
+
+
+        var uri = NavManager.ToAbsoluteUri(NavManager.Uri);
+        doc = HttpUtility.ParseQueryString(uri.Query).Get("doc");
+        id = HttpUtility.ParseQueryString(uri.Query).Get("id");
+
+         using (StreamReader streamReader = new StreamReader(doc))
+        {
+            text = streamReader.ReadToEnd();
+           
+        }
+
+       
+    }
+   
+
+    
+}
+<style>
+/*    .input_box{display:flex;flex-direction:column;width:20%}
+     input{margin-bottom:10px;padding:7px;border-radius:10px;outline:none;border: 2px black solid}
+     .btn{background:#fff;font-size:20px;border-radius:10px;border: 2px black solid;margin-bottom: 10px}
+     select{margin-bottom:10px;padding:7px;border-radius:10px;outline:none;border: 2px black solid}
+     .document{display:flex}
+     .document input{width: 20px;height:20px}*/
+     
+</style>

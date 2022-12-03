@@ -1,0 +1,42 @@
+﻿@page "/Read_Doc2"
+@using MongoDB.Bson.Serialization.Attributes
+@using MongoDB.Driver
+@using MongoDB.Bson
+@inject NavigationManager NavManager
+@inject NavigationManager NavigationManager
+@using ComunalWork.Data
+@using System.Web
+
+<style @onload="CheckSession" ></style>
+
+
+<P>@text</P>
+
+<a class="btn" @onclick="back" > Назад</a>
+
+@code{
+
+    string doc;
+    string id;
+    string text;
+
+   public void back()
+    {
+        NavigationManager.NavigateTo("Check_Project");
+    }
+
+    public void CheckSession()
+    {
+        var uri = NavManager.ToAbsoluteUri(NavManager.Uri);
+        doc = HttpUtility.ParseQueryString(uri.Query).Get("doc");
+        id = HttpUtility.ParseQueryString(uri.Query).Get("id");
+
+         using (StreamReader streamReader = new StreamReader(doc))
+        {
+            text = streamReader.ReadToEnd();      
+        }     
+    }
+   
+
+    
+}
